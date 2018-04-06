@@ -189,7 +189,7 @@ var Loader = function ( editor ) {
 
 					loader.parse( contents, '', function ( result ) {
 
-						result.scene.name = filename;
+						// result.scene.name = filename; // we want the scene names to match what's in the glb/gltf
 						editor.execute( new AddObjectCommand( result.scene ) );
 
 					} );

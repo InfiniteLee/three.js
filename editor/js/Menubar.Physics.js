@@ -7,7 +7,7 @@ Menubar.Physics = function ( editor ) {
 		return typeof value === 'number' ? parseFloat( value.toFixed( NUMBER_PRECISION ) ) : value;
 
 	}
-	
+
 	var config = editor.config;
 
 	var container = new UI.Panel();
@@ -22,35 +22,215 @@ Menubar.Physics = function ( editor ) {
 	options.setClass( 'options' );
 	container.add( options );
 
-	// New
+	// Add
+
+	var material = new THREE.MeshStandardMaterial();
+	material.opacity = 0.5;
+	material.transparent = true;
+
+	function updateMesh( mesh, data ) {
+
+		if ( data ) {
+
+			if ( data.hasOwnProperty( 'offset' ) ) {
+
+				mesh.position.set( data.offset.x, data.offset.y, data.offset.z );
+
+			}
+			if ( data.hasOwnProperty( 'orientation' ) ) {
+
+				var quat = new THREE.Quaternion( data.orientation.x, data.orientation.y, data.orientation.z, data.orientation.w );
+				mesh.setRotationFromQuaternion( quat );
+
+			}
+
+		}
+
+	}
+
+	// Box
+
+	function createBox( data ) {
+
+		var x = 1;
+		var y = 1;
+		var z = 1;
+
+		if ( data && data.hasOwnProperty( 'halfExtents' ) ) {
+
+			x = data.halfExtents.x;
+			y = data.halfExtents.y;
+			z = data.halfExtents.z;
+
+		}
+
+		var geometry = new THREE.BoxBufferGeometry( x, y, z, 1, 1, 1 );
+		geometry.name = 'CollisionShape';
+		var mesh = new THREE.Mesh( geometry, material );
+		mesh.name = 'Box';
+
+		updateMesh( mesh, data );
+
+		editor.execute( new AddObjectCommand( mesh ) );
+
+	}
+
+	var option = new UI.Row();
+	option.setClass( 'option' );
+	option.setTextContent( 'Add Col. Box' );
+	option.onClick( function () {
+
+		createBox();
+
+	} );
+	options.add( option );
+
+	// Sphere
+
+	function createSphere( data ) {
+
+		var radius = 1;
+
+		if ( data && data.hasOwnProperty( 'radius' ) ) {
+
+			radius = data.radius;
+
+		}
+		var geometry = new THREE.SphereBufferGeometry( data.radius, 8, 6, 0, Math.PI * 2, 0, Math.PI );
+		geometry.name = 'CollisionShape';
+		var mesh = new THREE.Mesh( geometry, material );
+		mesh.name = 'Sphere';
+
+		updateMesh( mesh, data );
+
+		editor.execute( new AddObjectCommand( mesh ) );
+
+	}
+
+	var option = new UI.Row();
+	option.setClass( 'option' );
+	option.setTextContent( 'Add Col. Sphere' );
+	option.onClick( function () {
+
+		createSphere();
+
+	} );
+	options.add( option );
+
+	// Cylinder
+
+	function createCylinder( data ) {
+
+		var radiusTop = 1;
+		var radiusBottom = 1;
+		var height = 1;
+		var numSegments = 8;
+
+		if ( data.hasOwnProperty( 'radiusTop' ) ) {
+
+			radiusTop = data.radiusTop;
+
+		}
+		if ( data.hasOwnProperty( 'radiusBottom' ) ) {
+
+			radiusBottom = data.radiusBottom;
+
+		}
+		if ( data.hasOwnProperty( 'height' ) ) {
+
+			height = data.height;
+
+		}
+		if ( data.hasOwnProperty( 'numSegments' ) ) {
+
+			numSegments = data.numSegments;
+
+		}
+
+		var geometry = new THREE.CylinderBufferGeometry( radiusTop, radiusBottom, height, numSegments, 1, false, 0, Math.PI * 2 );
+		geometry.name = 'CollisionShape';
+		var mesh = new THREE.Mesh( geometry, material );
+		mesh.name = 'Cylinder';
+
+		updateMesh( mesh, data );
+
+		editor.execute( new AddObjectCommand( mesh ) );
+
+	}
+
+	var option = new UI.Row();
+	option.setClass( 'option' );
+	option.setTextContent( 'Add Col. Cylinder' );
+	option.onClick( function () {
+
+		createCylinder();
+
+	} );
+	options.add( option );
+
+
+	options.add( new UI.HorizontalRule() );
 
 	// Import
 
-	// var form = document.createElement( 'form' );
-	// form.style.display = 'none';
-	// document.body.appendChild( form );
+	var form = document.createElement( 'form' );
+	form.style.display = 'none';
+	document.body.appendChild( form );
 
-	// var fileInput = document.createElement( 'input' );
-	// fileInput.type = 'file';
-	// fileInput.addEventListener( 'change', function ( event ) {
+	var fileInput = document.createElement( 'input' );
+	fileInput.type = 'file';
+	fileInput.accept = ".json";
+	fileInput.addEventListener( 'change', function ( e ) {
 
-	// 	editor.loader.loadFile( fileInput.files[ 0 ] );
-	// 	form.reset();
+		var fileReader = new FileReader();
+		fileReader.onload = function ( e ) {
 
-	// } );
-	// form.appendChild( fileInput );
+			var obj = JSON.parse( e.target.result );
 
-	// var option = new UI.Row();
-	// option.setClass( 'option' );
-	// option.setTextContent( 'Import' );
-	// option.onClick( function () {
+			if ( obj.hasOwnProperty( 'scenes' ) ) {
 
-	// 	fileInput.click();
+				for ( var key in obj.scenes ) {
 
-	// } );
-	// options.add( option );
+					var shapes = obj.scenes[ key ].shape;
+					for ( var i = 0; i < shapes.length; i ++ ) {
 
-	//
+						switch ( shapes[ i ].shape ) {
+
+							case 'box':
+								createBox( shapes[ i ] );
+								break;
+							case 'sphere':
+								createSphere( shapes[ i ] );
+								break;
+							case 'cylinder':
+								createCylinder( shapes[ i ] );
+								break;
+
+						}
+
+					}
+
+				}
+
+			}
+
+		};
+		fileReader.readAsText( e.target.files[ 0 ] );
+
+		form.reset();
+
+	} );
+	form.appendChild( fileInput );
+
+	var option = new UI.Row();
+	option.setClass( 'option' );
+	option.setTextContent( 'Import Col. JSON' );
+	option.onClick( function () {
+
+		fileInput.click();
+
+	} );
+	options.add( option );
 
 	options.add( new UI.HorizontalRule() );
 
@@ -58,54 +238,54 @@ Menubar.Physics = function ( editor ) {
 
 	var option = new UI.Row();
 	option.setClass( 'option' );
-	option.setTextContent( 'Export Collision' );
+	option.setTextContent( 'Export Col. JSON' );
 	option.onClick( function () {
 
 		var object = editor.scene;
 
-		var out = [];
-		bfs(object, out);
+		var out = { data: [], sceneName: null };
+		parseScene( object, out );
 
-		console.log(out);
+		var output = { "scenes": {} };
+		output.scenes[ out.sceneName ] = { "shape": out.data };
 
-		var output = {
-			"scenes": {
-				"Root Scene": {
-					"shape": out
-				}
-			}
-		};
-
-		output = JSON.stringify(output);
+		output = JSON.stringify( output );
 		saveString( output, 'collision.json' );
+
 	} );
 	options.add( option );
 
 	//
 
-	options.add( new UI.HorizontalRule() );
+	var validGeometries = [ "SphereBufferGeometry", "BoxBufferGeometry", "CylinderBufferGeometry" ];
 
-	var validGeometries = ["SphereBufferGeometry", "BoxBufferGeometry", "CylinderBufferGeometry"];
+	function parseScene( object, out ) {
 
-	function bfs(object, out) {
-		if (object.geometry && validGeometries.indexOf(object.geometry.type) > -1) {
+		if ( ! out.sceneName && object !== editor.scene && object.type === "Scene" ) {
+
+			out.sceneName = object.name;
+
+		}
+
+		if ( object.geometry && validGeometries.indexOf( object.geometry.type ) > - 1 && object.geometry.name === 'CollisionShape' ) {
 
 			var data;
 			var parameters = object.geometry.parameters;
-			var scale = new THREE.Vector3(); 
-			object.getWorldScale(scale);
+			var scale = new THREE.Vector3();
+			object.getWorldScale( scale );
 			var position = new THREE.Vector3();
-			object.getWorldPosition(position);
+			object.getWorldPosition( position );
 			var quaternion = new THREE.Quaternion();
-			object.getWorldQuaternion(quaternion);
+			object.getWorldQuaternion( quaternion );
 
-			switch (object.geometry.type) {
+			switch ( object.geometry.type ) {
+
 				case "SphereBufferGeometry":
 					data = {
 						shape: "sphere",
 						radius: parameters.radius * scale.x
  					};
-				break;
+					break;
 				case "BoxBufferGeometry":
 					data = {
 						shape: "box",
@@ -115,7 +295,7 @@ Menubar.Physics = function ( editor ) {
 							z: parameters.depth * scale.z
 						}
 					};
-				break;
+					break;
 				case "CylinderBufferGeometry":
 					data = {
 						shape: "cylinder",
@@ -124,7 +304,8 @@ Menubar.Physics = function ( editor ) {
 						height: parameters.height * scale.y,
 						numSegments: parameters.radialSegments
 					};
-				break;
+					break;
+
 			}
 
 			data.offset = {
@@ -138,13 +319,17 @@ Menubar.Physics = function ( editor ) {
 				z: quaternion.z,
 				w: quaternion.w
 			};
-			
-			out.push(data);
+
+			out.data.push( data );
+
 		}
 
-		for (var i = 0; i < object.children.length; i++) {
-			bfs(object.children[i], out);
+		for ( var i = 0; i < object.children.length; i ++ ) {
+
+			parseScene( object.children[ i ], out );
+
 		}
+
 	}
 
 	var link = document.createElement( 'a' );
