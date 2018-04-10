@@ -96,7 +96,7 @@ Menubar.Physics = function ( editor ) {
 			radius = data.radius;
 
 		}
-		var geometry = new THREE.SphereBufferGeometry( data.radius, 8, 6, 0, Math.PI * 2, 0, Math.PI );
+		var geometry = new THREE.SphereBufferGeometry( radius, 8, 6, 0, Math.PI * 2, 0, Math.PI );
 		geometry.name = 'CollisionShape';
 		var mesh = new THREE.Mesh( geometry, material );
 		mesh.name = 'Sphere';
@@ -126,22 +126,22 @@ Menubar.Physics = function ( editor ) {
 		var height = 1;
 		var numSegments = 8;
 
-		if ( data.hasOwnProperty( 'radiusTop' ) ) {
+		if ( data && data.hasOwnProperty( 'radiusTop' ) ) {
 
 			radiusTop = data.radiusTop;
 
 		}
-		if ( data.hasOwnProperty( 'radiusBottom' ) ) {
+		if ( data && data.hasOwnProperty( 'radiusBottom' ) ) {
 
 			radiusBottom = data.radiusBottom;
 
 		}
-		if ( data.hasOwnProperty( 'height' ) ) {
+		if ( data && data.hasOwnProperty( 'height' ) ) {
 
 			height = data.height;
 
 		}
-		if ( data.hasOwnProperty( 'numSegments' ) ) {
+		if ( data && data.hasOwnProperty( 'numSegments' ) ) {
 
 			numSegments = data.numSegments;
 
