@@ -34,12 +34,13 @@ Menubar.Physics = function ( editor ) {
 
 			if ( data.hasOwnProperty( 'offset' ) ) {
 
-				mesh.position.set( data.offset.x, data.offset.y, data.offset.z );
+				mesh.position.copy( data.offset );
 
 			}
 			if ( data.hasOwnProperty( 'orientation' ) ) {
 
-				var quat = new THREE.Quaternion( data.orientation.x, data.orientation.y, data.orientation.z, data.orientation.w );
+				var quat = new THREE.Quaternion();
+				quat.copy(data.orientation);
 				mesh.setRotationFromQuaternion( quat );
 
 			}
@@ -58,9 +59,9 @@ Menubar.Physics = function ( editor ) {
 
 		if ( data && data.hasOwnProperty( 'halfExtents' ) ) {
 
-			x = data.halfExtents.x;
-			y = data.halfExtents.y;
-			z = data.halfExtents.z;
+			x = data.halfExtents.x * 2;
+			y = data.halfExtents.y * 2;
+			z = data.halfExtents.z * 2;
 
 		}
 
@@ -290,9 +291,9 @@ Menubar.Physics = function ( editor ) {
 					data = {
 						shape: "box",
 						halfExtents: {
-							x: parameters.width * scale.x,
-							y: parameters.height * scale.y,
-							z: parameters.depth * scale.z
+							x: parameters.width/2 * scale.x,
+							y: parameters.height/2 * scale.y,
+							z: parameters.depth/2 * scale.z
 						}
 					};
 					break;
