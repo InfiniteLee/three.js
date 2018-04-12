@@ -66,9 +66,8 @@ Menubar.Physics = function ( editor ) {
 		}
 
 		var geometry = new THREE.BoxBufferGeometry( x, y, z, 1, 1, 1 );
-		geometry.name = 'CollisionShape';
 		var mesh = new THREE.Mesh( geometry, material );
-		mesh.name = 'Box';
+		mesh.name = 'BoxCollisionShape';
 
 		updateMesh( mesh, data );
 
@@ -98,9 +97,8 @@ Menubar.Physics = function ( editor ) {
 
 		}
 		var geometry = new THREE.SphereBufferGeometry( radius, 8, 6, 0, Math.PI * 2, 0, Math.PI );
-		geometry.name = 'CollisionShape';
 		var mesh = new THREE.Mesh( geometry, material );
-		mesh.name = 'Sphere';
+		mesh.name = 'SphereCollisionShape';
 
 		updateMesh( mesh, data );
 
@@ -149,9 +147,8 @@ Menubar.Physics = function ( editor ) {
 		}
 
 		var geometry = new THREE.CylinderBufferGeometry( radiusTop, radiusBottom, height, numSegments, 1, false, 0, Math.PI * 2 );
-		geometry.name = 'CollisionShape';
 		var mesh = new THREE.Mesh( geometry, material );
-		mesh.name = 'Cylinder';
+		mesh.name = 'CylinderCollisionShape';
 
 		updateMesh( mesh, data );
 
@@ -268,7 +265,7 @@ Menubar.Physics = function ( editor ) {
 
 		}
 
-		if ( object.geometry && validGeometries.indexOf( object.geometry.type ) > - 1 && object.geometry.name === 'CollisionShape' ) {
+		if ( object.geometry && validGeometries.indexOf( object.geometry.type ) > - 1 ) {
 
 			var data;
 			var parameters = object.geometry.parameters;
